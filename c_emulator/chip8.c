@@ -1,4 +1,3 @@
-#include "SDL2/SDL.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,11 +8,11 @@
 #define PROGRAM_START 0x200;
 
 /* 4 KiB of memory in the system */
-unsigned char memory[4096];
+uint8_t memory[4096];
 
 /* Registers are named V0, V1, ..., VF,
    and are 8-bit. */
-unsigned char registers[16];
+uint8_t registers[16];
 
 /* Address register is 16 bits long. */
 unsigned short register_i;
@@ -25,53 +24,19 @@ unsigned short program_counter;
    be storing 1's and 0's here. */
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
-unsigned char screen[SCREEN_HEIGHT][SCREEN_WIDTH];
-
+static uint8_t screen[SCREEN_HEIGHT][SCREEN_WIDTH];
+ 
 /* Original 1802 version had 24 levels of nesting */
 unsigned short stack[24];
-unsigned char stack_pointer;
+uint8_t stack_pointer;
 
 /* State of all hex keys must be saved. */
-unsigned char keypad[16];
+uint8_t keypad[16];
 
 /* Two timers that count down at 60Hz
    Soudn timer causes beep when finished. */
-unsigned char delay_timer;
-unsigned char sound_timer;
-
-
-static SDL_Window* window;
-
-void initialize_SDL()
-{
-    if(SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        printf("Could not init SDL, something is wrong.\n");
-    }
-    
-    window = SDL_CreateWindow(
-            "Hello World!",
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            640,
-            480,
-            SDL_WINDOW_SHOWN
-    );
-    if (!window)
-    {
-        printf("Window did not get created\n");
-    }
-    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0x0, 0x0, 0x0));
-    SDL_UpdateWindowSurface(window);
-}
-
-
-void cleanup()
-{
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-}
+uint8_t delay_timer;
+uint8_t sound_timer;
 
 
 int load_rom()
@@ -98,12 +63,12 @@ void emulate_cycle()
         switch (byte3 << 4 | byte4)
         {
         case 0xEE:
-            program_counter = stack[--stack_pointer];
+            program_counter = stack[stack_pointer--];
             break;
         
         case 0xE0:
-            // TODO: clear screen
-        
+            for (int i = 0; i <= SCREEN_HEIGHT * SCREEN_WIDTH - 1; i++)
+                *((uint8_t*) screen + i) = 0;
         default:
             break;
         }
@@ -220,7 +185,17 @@ void emulate_cycle()
         break;
     
     case 0xD:
-        // TODO: drawing
+        registers[0xF] = 0;
+        for (int height = 0; height <= byte4; height++)
+        {
+            for (int length = 0; length <= 8; length++)
+            {
+                uint8_t row = byte2 + height;
+                uint8_t col = byte3 + length;
+                screen[row][col] ^= memory[register_i] & (1 << length);
+                registers[0xF] |= ((memory[register_i] >> length) & (1)) & screen[row][col];
+            }
+        }
         program_counter += 2;
         break;
     
@@ -228,13 +203,13 @@ void emulate_cycle()
         switch (byte3 << 4 | byte4)
         {
         case 0x9E:
-            if (keypad[registers[byte2]])
+            if (keypad[registers[byte2]]) //TODO: change to SDL
                 program_counter += 2;
             program_counter += 2;
             break;
         
         case 0xA1:
-            if (!keypad[registers[byte2]])
+            if (!keypad[registers[byte2]]) //TODO: change to SDL
                 program_counter += 2;
             program_counter += 2;
             break;
@@ -269,11 +244,13 @@ void emulate_cycle()
             break;
         
         case 0x29:
-            //TODO: sprite command
+            register_i = 0x50 + (registers[byte2]) * 5;
             break;
         
         case 0x33:
-            //TODO: binary command
+            memory[register_i] = registers[byte2] / 100;
+            memory[register_i + 1] = (registers[byte2] % 100) / 10;
+            memory[register_i + 2] = registers[byte2] % 10;
             break;
         
         case 0x55:
@@ -300,20 +277,11 @@ void emulate_cycle()
 
 int main(int argc, char **argv)
 {
-    initialize_SDL();
     int quit = 0;
-    SDL_Event event;
     while (!quit)
     {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                quit = 1;
-            }
-
-        }
         emulate_cycle();
     }
-    cleanup();
     printf("Exiting\n");
     return 0;
 }
