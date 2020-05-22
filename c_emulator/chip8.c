@@ -273,15 +273,3 @@ void emulate_cycle()
         break;
     }
 }
-
-
-int main(int argc, char **argv)
-{
-    int quit = 0;
-    while (!quit)
-    {
-        emulate_cycle();
-    }
-    printf("Exiting\n");
-    return 0;
-}

@@ -8,8 +8,13 @@ Resources I've used so far for learning:
 - https://github.com/xyproto/sdl2-examples/blob/master/c11/main.c
 - https://www.willusher.io/sdl2%20tutorials/2013/08/17/lesson-1-hello-world
 - https://wiki.libsdl.org/APIByCategory
+- https://matthewstyles.com/writing-an-sdl2-game-loop/
+- https://lazyfoo.net/tutorials/SDL/46_multithreading/index.php
+- https://en.wikipedia.org/wiki/CHIP-8#Virtual_machine_description
+
 
 Random things I've learned:
 
 - macOS will not show the SDL Window with just a delay, you have to have an actual loop
 that gives it time to show up, idk why
+- 

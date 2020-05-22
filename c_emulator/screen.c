@@ -28,7 +28,6 @@ void initialize_screen()
     {
         printf("Could not init SDL, something is wrong.\n");
     }
-    
     window = SDL_CreateWindow(
             "Hello World!",
             SDL_WINDOWPOS_CENTERED,
@@ -42,7 +41,7 @@ void initialize_screen()
         printf("Window did not get created\n");
     }
     SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0x0, 0x0, 0x));
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0x54, 0x3, 0x19));
     SDL_UpdateWindowSurface(window);
 }
 
