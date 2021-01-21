@@ -4,6 +4,7 @@
 int main(int argc, char **argv)
 {
     initialize_screen();
+    // this is a todo
     while (1)
     {
         // Get the next event

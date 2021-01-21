@@ -11,6 +11,9 @@ Resources I've used so far for learning:
 - https://matthewstyles.com/writing-an-sdl2-game-loop/
 - https://lazyfoo.net/tutorials/SDL/46_multithreading/index.php
 - https://en.wikipedia.org/wiki/CHIP-8#Virtual_machine_description
+- http://mattmik.com/files/chip8/mastering/chip8.html
+- https://github.com/AfBu/haxe-CHIP-8-emulator/wiki/(Super)CHIP-8-Secrets
+
 
 
 Random things I've learned:
