@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "screen.c"
+#include "chip8.h"
 
 int main(int argc, char **argv)
 {
     initialize_screen();
-    // this is a todo
     while (1)
     {
         // Get the next event
@@ -13,6 +13,18 @@ int main(int argc, char **argv)
         {
             if (event.type == SDL_QUIT)
                 break;
+            
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYDOWN)
+            {
+                for (int i = 0; i < NUM_KEYS; i++)
+                {
+                    if (event.key.keysym.sym == keymap[i])
+                    {
+                        set_key(0, event.type == SDL_KEYDOWN);
+                    }
+                }
+            }
+                
         }
     }
     cleanup_screen();

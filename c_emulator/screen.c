@@ -29,7 +29,7 @@ void initialize_screen()
         printf("Could not init SDL, something is wrong.\n");
     }
     window = SDL_CreateWindow(
-            "Hello World!",
+            "CHIP-8 Emulator",
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
             640,

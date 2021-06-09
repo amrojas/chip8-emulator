@@ -1,11 +1,7 @@
+#include "chip8.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-/* Most programs begin here and do not
-   access anything lower than this,
-   this is where the interpreter itself
-   lived. */
-#define PROGRAM_START 0x200;
+#include <stdbool.h>
 
 /* 4 KiB of memory in the system */
 uint8_t memory[4096];
@@ -20,23 +16,27 @@ unsigned short register_i;
 /* 4 KiB would take 12 bits to address. */
 unsigned short program_counter;
 
-/* Pixels on the screen are off or on, so will just
-   be storing 1's and 0's here. */
-#define SCREEN_WIDTH 64
-#define SCREEN_HEIGHT 32
+/* 1s and 0s for screen go here */
 static uint8_t screen[SCREEN_HEIGHT][SCREEN_WIDTH];
  
 /* Original 1802 version had 24 levels of nesting */
 unsigned short stack[24];
 uint8_t stack_pointer;
 
-/* State of all hex keys must be saved. */
-uint8_t keypad[16];
+/* State of keys must be saved. */
+uint8_t keypad[NUM_KEYS];
 
 /* Two timers that count down at 60Hz
    Soudn timer causes beep when finished. */
 uint8_t delay_timer;
 uint8_t sound_timer;
+
+const SDL_Keycode keymap[16] = {
+    SDLK_1, SDLK_2, SDLK_3, SDLK_4,
+    SDLK_q, SDLK_w, SDLK_e, SDLK_r,
+    SDLK_a, SDLK_s, SDLK_d, SDLK_f,
+    SDLK_z, SDLK_x, SDLK_c, SDLK_v,
+};
 
 
 int load_rom()
@@ -53,6 +53,7 @@ int load_rom()
 
 void emulate_cycle()
 {
+    // Byte count is from left to right
     char byte1 = memory[program_counter] >> 4 & 0xF;
     char byte2 = memory[program_counter] & 0xF;
     char byte3 = memory[program_counter + 1] >> 4 & 0xF;
@@ -203,13 +204,13 @@ void emulate_cycle()
         switch (byte3 << 4 | byte4)
         {
         case 0x9E:
-            if (keypad[registers[byte2]]) //TODO: change to SDL
+            if (keypad[registers[byte2]])
                 program_counter += 2;
             program_counter += 2;
             break;
         
         case 0xA1:
-            if (!keypad[registers[byte2]]) //TODO: change to SDL
+            if (!keypad[registers[byte2]])
                 program_counter += 2;
             program_counter += 2;
             break;
@@ -227,8 +228,22 @@ void emulate_cycle()
             break;
         
         case 0x0A:
-            //TODO: wait for key press
+        {
+            bool key_is_pressed = false;
+            for (int i = 0; i < NUM_KEYS; i++)
+            {
+                if (keypad[i])
+                {
+                    registers[byte2] = i;
+                    key_is_pressed = true;
+                }
+            }
+            // Early return and let key presses be recognized
+            // Will keep rerunning this instruction
+            if (!key_is_pressed)
+                return;
             break;
+        }
         
         case 0x15:
             delay_timer = registers[byte2];
@@ -272,4 +287,9 @@ void emulate_cycle()
     default:
         break;
     }
+}
+
+void set_key(int keynum, bool value)
+{
+    keypad[keynum] = value;
 }
