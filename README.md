@@ -19,5 +19,5 @@ Resources I've used so far for learning:
 Random things I've learned:
 
 - macOS will not show the SDL Window with just a delay, you have to have an actual loop
-that gives it time to show up, idk why
-- 
+that gives it time to show up
+- include path should be "/usr/local/include" on macOS, so this needed to be added to "C_Cpp.default.includePath" in VSCode to make it recognize SDL2
