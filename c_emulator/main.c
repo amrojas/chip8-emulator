@@ -20,12 +20,12 @@ int main(int argc, char **argv)
                 {
                     if (event.key.keysym.sym == keymap[i])
                     {
-                        set_key(0, event.type == SDL_KEYDOWN);
+                        set_key(i, event.type == SDL_KEYDOWN);
                     }
                 }
             }
 
-            
+            update(screen);
         }
     }
     cleanup_screen();

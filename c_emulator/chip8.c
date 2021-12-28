@@ -17,7 +17,7 @@ unsigned short register_i;
 unsigned short program_counter;
 
 /* 1s and 0s for screen go here */
-static uint8_t screen[SCREEN_HEIGHT][SCREEN_WIDTH];
+uint8_t screen[SCREEN_HEIGHT][SCREEN_WIDTH];
  
 /* Original 1802 version had 24 levels of nesting */
 unsigned short stack[24];
@@ -38,6 +38,26 @@ const SDL_Keycode keymap[16] = {
     SDLK_z, SDLK_x, SDLK_c, SDLK_v,
 };
 
+static unsigned char chip8_fontset[80] =
+{ 
+  0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+  0x20, 0x60, 0x20, 0x20, 0x70, // 1
+  0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+  0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+  0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+  0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+  0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+  0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+  0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+  0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+  0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+  0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+  0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+  0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+  0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+  0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
+
 
 int load_rom()
 {
@@ -45,8 +65,9 @@ int load_rom()
     register_i = 0;
     stack_pointer = 0;
 
-    FILE *file = fopen("pong", "rb");
+    FILE *file = fopen("roms/Pong [Paul Vervalin, 1990].ch8", "rb");
     fread(memory, sizeof(memory), sizeof(char), file);
+    fclose(file);
     return 0;
 }
 
@@ -193,8 +214,10 @@ void emulate_cycle()
             {
                 uint8_t row = byte2 + height;
                 uint8_t col = byte3 + length;
-                screen[row][col] ^= memory[register_i] & (1 << length);
-                registers[0xF] |= ((memory[register_i] >> length) & (1)) & screen[row][col];
+                uint8_t new_state = screen[row][col] ^ memory[register_i] & (1 << length);
+                if (new_state == 0 && screen[row][col] == 1)
+                    registers[0xF] |= 1;
+                screen[row][col] = new_state;
             }
         }
         program_counter += 2;

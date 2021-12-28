@@ -18,6 +18,7 @@
 #define NUM_KEYS 16
 
 extern const SDL_Keycode keymap[16];
+extern uint8_t screen[SCREEN_HEIGHT][SCREEN_WIDTH];
 
 void set_key(int keynum, bool value);
 void emulate_cycle();
